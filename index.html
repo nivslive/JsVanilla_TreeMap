@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treemap Dinâmico em JavaScript</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-container input {
+            width: 300px;
+            margin-bottom: 10px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .filter-buttons button {
+            width: 48%;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            width: 300px;
+            margin: 0;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s;
+        }
+
+        li:hover {
+            background-color: #f1f1f1;
+        }
+
+        li:last-child {
+            border-bottom: none;
+        }
+
+        .city-info {
+            flex-grow: 1;
+        }
+
+        canvas {
+            border: 1px solid #ccc;
+            background-color: #fff;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Treemap Dinâmico</h1>
+    <div class="controls">
+        <input type="text" id="cityName" placeholder="Nome da Cidade" required>
+        <input type="number" id="cityValue" placeholder="Valor" required>
+        <button id="addCityBtn">Adicionar Cidade</button>
+    </div>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Pesquisar Cidade" oninput="filterCities()">
+        <input type="number" id="valueSearchInput" placeholder="Pesquisar Valor" oninput="filterCities()">
+    </div>
+    <div class="filter-buttons">
+        <button onclick="filterByValue('greater')">Maior que</button>
+        <button onclick="filterByValue('less')">Menor que</button>
+        <button onclick="resetFilter()">Resetar Filtros</button>
+    </div>
+    <ul id="cityList"></ul>
+    <canvas id="myChart" width="400" height="300"></canvas>
+    <script>
+        const canvas = document.getElementById('myChart');
+        const ctx = canvas.getContext('2d');
+        const cityList = document.getElementById('cityList');
+        const searchInput = document.getElementById('searchInput');
+        const valueSearchInput = document.getElementById('valueSearchInput');
+
+        // Array inicial com dados das cidades
+        let data = [
+            { name: 'São Paulo', value: 5000 },
+            { name: 'Rio de Janeiro', value: 3000 },
+            { name: 'Belo Horizonte', value: 2000 },
+            { name: 'Salvador', value: 1500 },
+        ];
+
+        let filteredData = [...data]; // Array para armazenar dados filtrados
+
+        // Função para atualizar o treemap
+        function updateTreeMap() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpar o canvas
+            const totalValue = filteredData.reduce((acc, d) => acc + d.value, 0);
+            createTreeMap(filteredData, 40, 20, canvas.width - 80, canvas.height - 60, totalValue);
+        }
+
+        // Função para criar o layout do treemap
+        function createTreeMap(data, x, y, width, height, totalValue) {
+            data.sort((a, b) => b.value - a.value);
+
+            let currentX = x;
+            let currentY = y;
+            let remainingWidth = width;
+            let remainingHeight = height;
+
+            data.forEach((d, i) => {
+                const area = (d.value / totalValue) * (width * height);
+                const orientation = Math.floor(Math.random() * 3);
+
+                let barWidth, barHeight;
+
+                if (orientation === 0) {
+                    barWidth = remainingWidth;
+                    barHeight = area / barWidth;
+                } else if (orientation === 1) {
+                    barHeight = remainingHeight;
+                    barWidth = area / barHeight;
+                } else {
+                    barWidth = Math.sqrt(area);
+                    barHeight = barWidth;
+                }
+
+                if (barWidth > remainingWidth) {
+                    barWidth = remainingWidth;
+                    barHeight = area / barWidth;
+                }
+
+                if (barHeight > remainingHeight) {
+                    barHeight = remainingHeight;
+                    barWidth = area / barHeight;
+                }
+
+                ctx.fillStyle = `hsl(${i * 360 / data.length}, 70%, 50%)`;
+                ctx.fillRect(currentX, currentY, barWidth, barHeight);
+
+                // Ajustar a posição do texto para centralizá-lo
+                ctx.fillStyle = 'white'; // Cor do texto
+                ctx.textAlign = 'center'; // Centraliza o texto
+                ctx.textBaseline = 'middle'; // Centraliza verticalmente
+                ctx.fillText(d.name, currentX + barWidth / 2, currentY + barHeight / 2);
+
+                if (orientation === 0) {
+                    currentY += barHeight;
+                } else {
+                    currentX += barWidth;
+                    if (currentX + barWidth > x + width) {
+                        currentX = x;
+                        currentY += barHeight;
+                    }
+                }
+
+                remainingWidth = width - (currentX - x);
+                remainingHeight = height - (currentY - y);
+            });
+        }
+
+        // Função para adicionar uma cidade
+        document.getElementById('addCityBtn').addEventListener('click', () => {
+            const cityName = document.getElementById('cityName').value;
+            const cityValue = parseFloat(document.getElementById('cityValue').value);
+
+            if (cityName && !isNaN(cityValue) && cityValue > 0) {
+                // Adicionar a nova cidade ao array
+                data.push({ name: cityName, value: cityValue });
+                filteredData = [...data]; // Reinicia a lista filtrada
+                document.getElementById('cityName').value = '';
+                document.getElementById('cityValue').value = '';
+                updateCityList(); // Atualiza a lista de cidades
+                updateTreeMap(); // Atualiza o treemap
+            }
+        });
+
+        // Função para atualizar a lista de cidades
+        function updateCityList(search = '', value = '') {
+            cityList.innerHTML = ''; // Limpa a lista
+            const filtered = filteredData.filter(city =>
+                city.name.toLowerCase().includes(search.toLowerCase()) &&
+                (!value || city.value.toString().includes(value))
+            );
+
+            filtered.forEach(city => {
+                const li = document.createElement('li');
+                li.className = 'city-info';
+                li.textContent = `${city.name} - R$ ${city.value.toFixed(2)}`;
+
+                // Botão de editar
+                const editBtn = document.createElement('button');
+                editBtn.textContent = 'Editar';
+                editBtn.addEventListener('click', () => editCity(city));
+                li.appendChild(editBtn);
+
+                // Botão de remover
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = 'Remover';
+                removeBtn.addEventListener('click', () => removeCity(city));
+                li.appendChild(removeBtn);
+
+                cityList.appendChild(li);
+            });
+        }
+
+        // Função para filtrar cidades pela pesquisa
+        function filterCities() {
+            const searchValue = searchInput.value;
+            const valueValue = valueSearchInput.value;
+            updateCityList(searchValue, valueValue); // Atualiza a lista com base na pesquisa
+            updateTreeMap(); // Atualiza o treemap
+        }
+
+        // Função para filtrar cidades por valor
+        function filterByValue(condition) {
+            const value = parseFloat(valueSearchInput.value);
+
+            // Se o campo de valor estiver vazio, não aplicar nenhum filtro
+            if (isNaN(value)) {
+                filteredData = [...data]; // Reinicia a lista filtrada
+            } else {
+                // Atualiza filteredData de acordo com a condição
+                if (condition === 'greater') {
+                    filteredData = data.filter(city => city.value > value);
+                } else if (condition === 'less') {
+                    filteredData = data.filter(city => city.value < value);
+                }
+            }
+
+            updateCityList(searchInput.value, valueSearchInput.value); // Atualiza a lista de cidades
+            updateTreeMap(); // Atualiza o treemap
+        }
+
+        // Função para resetar filtros
+        function resetFilter() {
+            filteredData = [...data]; // Reinicia a lista filtrada
+            searchInput.value = '';
+            valueSearchInput.value = '';
+            updateCityList(); // Atualiza a lista de cidades
+            updateTreeMap(); // Atualiza o treemap
+        }
+
+        // Função para editar cidade
+        function editCity(city) {
+            const newValue = prompt(`Editar valor para ${city.name}:`, city.value);
+            if (newValue !== null) {
+                city.value = parseFloat(newValue);
+                updateCityList(); // Atualiza a lista de cidades
+                updateTreeMap(); // Atualiza o treemap
+            }
+        }
+
+        // Função para remover cidade
+        function removeCity(cityToRemove) {
+            data = data.filter(city => city !== cityToRemove);
+            filteredData = [...data]; // Atualiza a lista filtrada
+            updateCityList(); // Atualiza a lista de cidades
+            updateTreeMap(); // Atualiza o treemap
+        }
+
+        // Inicializa a lista de cidades e o treemap
+        updateCityList();
+        updateTreeMap();
+    </script>
+</body>
+
+</html>

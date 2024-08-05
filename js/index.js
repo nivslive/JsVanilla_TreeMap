@@ -8,7 +8,7 @@ export class Boot {
             this.load();
         }, 100);
     }
-    
+
     page(Page) {
         return new Page();
     }
@@ -17,6 +17,12 @@ export class Boot {
         const component = new Component();
         const cityManager = new CityManager();
         const Treemap = new TreeMap(document.getElementById('myChart'));
+
+
+        // Expor cityManager globalmente
+        window.cityManager = cityManager;
+        window.treemap = Treemap;
+
 
         document.getElementById('addCityBtn').addEventListener('click', () => {
             const name = document.getElementById('cityName').value;

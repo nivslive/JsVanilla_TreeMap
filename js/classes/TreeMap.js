@@ -41,6 +41,8 @@ export class TreeMap {
                 barHeight = height;
                 barWidth = area / barHeight;
             }
+            // Verifique se as dimensões estão corretas
+            console.log(`Renderizando ${d.name}: largura ${barWidth}, altura ${barHeight}`);
 
             this.ctx.fillStyle = `hsl(${i * 360 / data.length}, 70%, 50%)`;
             this.ctx.fillRect(currentX, currentY, barWidth, barHeight);

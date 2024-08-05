@@ -20,14 +20,14 @@ export class CityManager {
         this.data.push(new City(name, value));
         this.filteredData = [...this.data];
         this.updateCityList();
-        treemap.updateTreeMap(this.filteredData);
+        treemap.update(this.filteredData);
     }
 
     filterCities() {
         const searchValue = this.searchInput.value;
         const valueValue = this.valueSearchInput.value;
         this.updateCityList(searchValue, valueValue);
-        treemap.updateTreeMap(this.filteredData);
+        treemap.update(this.filteredData);
     }
 
     filterByValue(condition) {
@@ -40,7 +40,7 @@ export class CityManager {
             );
         }
         this.updateCityList(this.searchInput.value, this.valueSearchInput.value);
-        treemap.updateTreeMap(this.filteredData);
+        treemap.update(this.filteredData);
     }
 
     resetFilter() {
@@ -48,7 +48,7 @@ export class CityManager {
         this.searchInput.value = '';
         this.valueSearchInput.value = '';
         this.updateCityList();
-        treemap.updateTreeMap(this.filteredData);
+        treemap.update(this.filteredData);
     }
 
     updateCityList(search = '', value = '') {
@@ -82,7 +82,7 @@ export class CityManager {
         if (newValue !== null) {
             city.value = parseFloat(newValue);
             this.updateCityList();
-            treemap.updateTreeMap(this.filteredData);
+            treemap.update(this.filteredData);
         }
     }
 
@@ -90,6 +90,6 @@ export class CityManager {
         this.data = this.data.filter(city => city !== cityToRemove);
         this.filteredData = [...this.data];
         this.updateCityList();
-        treemap.updateTreeMap(this.filteredData);
+        treemap.update(this.filteredData);
     }
 }

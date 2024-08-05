@@ -23,7 +23,7 @@ export class Boot {
         window.cityManager = cityManager;
         window.treemap = Treemap;
 
-
+        window.treemap.update(cityManager.filteredData);
         document.getElementById('addCityBtn').addEventListener('click', () => {
             const name = document.getElementById('cityName').value;
             const value = parseFloat(document.getElementById('cityValue').value);

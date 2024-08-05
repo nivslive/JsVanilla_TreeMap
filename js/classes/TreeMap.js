@@ -6,13 +6,13 @@ export class TreeMap {
         this.height = canvas.height;
     }
 
-    updateTreeMap(data) {
+    update(data) {
         this.ctx.clearRect(0, 0, this.width, this.height);
         const totalValue = data.reduce((acc, d) => acc + d.value, 0);
-        this.createTreeMap(data, 40, 20, this.width - 80, this.height - 60, totalValue);
+        this.create(data, 40, 20, this.width - 80, this.height - 60, totalValue);
     }
 
-    createTreeMap(data, x, y, width, height, totalValue) {
+    create(data, x, y, width, height, totalValue) {
         data.sort((a, b) => b.value - a.value);
 
         let currentX = x;

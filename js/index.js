@@ -1,7 +1,19 @@
 import { TreeMap, CityManager } from "./classes/index.js";
 import { Component } from "./classes/Helper/index.js";
 export class Boot {
-    constructor() {
+    
+    render(Page) {
+        this.page(Page);
+        setTimeout(() => {
+            this.load();
+        }, 100);
+    }
+    
+    page(Page) {
+        return new Page();
+    }
+
+    load() {
         const component = new Component();
         const cityManager = new CityManager();
         const Treemap = new TreeMap(document.getElementById('myChart'));

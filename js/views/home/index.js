@@ -1,4 +1,4 @@
-import { Component } from "../../classes/Helper/index.js";
+import { Component } from "../../classes/system/index.js";
 export class Home {
     constructor() {
         const componentLoader = new Component();

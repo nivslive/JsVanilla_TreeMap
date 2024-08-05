@@ -1,5 +1,5 @@
 import { TreeMap, CityManager } from "./classes/index.js";
-import { Component } from "./classes/Helper/index.js";
+import { Component } from "./classes/system/index.js";
 export class Boot {
     
     render(Page) {
